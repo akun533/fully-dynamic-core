@@ -108,12 +108,12 @@ public class DynamicCrudService {
     }
     
     /**
-     * 执行任意SQL语句
+     * 执行任意SQL语句 (仅用于更新操作)
      */
     @Transactional
-    public void executeSql(String sql) {
+    public int executeUpdateSql(String sql) {
         Query query = entityManager.createNativeQuery(sql);
-        query.executeUpdate();
+        return query.executeUpdate();
     }
     
     /**
@@ -123,7 +123,7 @@ public class DynamicCrudService {
     private void validateTableExists(String tableName) {
         try {
             // 尝试从表中选择一行数据来验证表是否存在
-            entityManager.createNativeQuery("SELECT 1 FROM " + tableName + " LIMIT 1").getResultList();
+            entityManager.createNativeQuery("SELECT 1 FROM " + tableName + " LIMIT 1").getSingleResult();
         } catch (Exception e) {
             throw new RuntimeException("表 '" + tableName + "' 不存在或无法访问: " + e.getMessage());
         }

@@ -33,14 +33,21 @@ public class FullyDynamicController {
         try {
             // 根据示例数据创建表
             String sql = generateCreateTableSql(tableName, sampleData);
-            dynamicCrudService.executeSql(sql);
+            dynamicCrudService.executeUpdateSql(sql);
             
             // 验证表是否创建成功
-            dynamicCrudService.executeSql("SELECT 1 FROM " + tableName + " LIMIT 1");
-            
-            response.put("success", true);
-            response.put("message", "表创建成功");
-            response.put("sql", sql); // 返回执行的SQL语句，便于调试
+            try {
+                dynamicCrudService.select(tableName, new HashMap<>());
+                response.put("success", true);
+                response.put("message", "表创建成功");
+                response.put("sql", sql); // 返回执行的SQL语句，便于调试
+            } catch (Exception e) {
+                // 如果验证失败，则尝试另一种方式验证
+                dynamicCrudService.executeUpdateSql("SELECT 1 FROM " + tableName + " LIMIT 1");
+                response.put("success", true);
+                response.put("message", "表创建成功");
+                response.put("sql", sql);
+            }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success", false);
